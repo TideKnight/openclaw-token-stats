@@ -74,6 +74,7 @@ The goal is not fancy dashboards. The goal is fast, offline answers.
 ```text
 openclaw-token-stats/
 ├── README.md
+├── LICENSE
 ├── SKILL.md
 ├── scripts/
 │   ├── openclaw_token_stats.py
@@ -84,7 +85,8 @@ openclaw-token-stats/
 │   ├── cron-prompt-weekly.txt
 │   └── cron-prompt-monthly.txt
 └── examples/
-    └── sample-daily-report.md
+    ├── sample-daily-report.md
+    └── sample-weekly-report.md
 ```
 
 ---
@@ -135,9 +137,20 @@ python3 scripts/openclaw_token_report.py --agent main --period monthly
 
 ---
 
+## Use it in two ways
+
+### 1. As a plain script bundle
+Use the Python scripts directly if you just want local reporting.
+
+### 2. As an OpenClaw skill
+Keep `SKILL.md`, `scripts/`, and `references/` together inside a skill directory if you want another agent instance to trigger and use it as a reusable skill.
+
+---
+
 ## Example output
 
-See [`examples/sample-daily-report.md`](examples/sample-daily-report.md).
+- Daily: [`examples/sample-daily-report.md`](examples/sample-daily-report.md)
+- Weekly: [`examples/sample-weekly-report.md`](examples/sample-weekly-report.md)
 
 ---
 
@@ -190,6 +203,12 @@ This project is best for:
 - Reads local files only
 - No external upload path in the reporting scripts
 - Best used on a machine where OpenClaw logs are already present
+
+---
+
+## License
+
+MIT
 
 ---
 
