@@ -2,21 +2,39 @@
 
 Offline token and cost reporting for local OpenClaw session logs.
 
-`openclaw-token-stats` is an AgentSkill plus a pair of local scripts for aggregating OpenClaw usage from session jsonl logs. It is designed for people who want a practical answer to questions like:
+`openclaw-token-stats` is a small OpenClaw skill + script bundle for turning raw session jsonl logs into practical token and cost reports.
+
+It is built for questions like:
 
 - How many tokens did OpenClaw burn today?
 - Which model caused the spike?
 - How much of the total came from cache?
 - What did the last day / week / month cost?
 
-This tool reads local logs only. It does not depend on the OpenClaw UI and does not send usage data to external services.
+It reads local logs only. It does not rely on the OpenClaw UI and does not upload usage data anywhere.
+
+---
+
+## What it includes
+
+- `scripts/openclaw_token_stats.py`  
+  Aggregate token / cost usage from local session logs.
+
+- `scripts/openclaw_token_report.py`  
+  Generate daily / weekly / monthly Markdown reports.
+
+- `SKILL.md`  
+  AgentSkill entry point for OpenClaw usage.
+
+- `references/`  
+  Supporting notes for observed fields and cron prompts.
 
 ---
 
 ## What it does
 
 - Reads OpenClaw session logs under `~/.openclaw/agents/<agent>/sessions/*.jsonl*`
-- Aggregates usage fields like:
+- Aggregates usage fields such as:
   - `input`
   - `output`
   - `cacheRead`
@@ -28,28 +46,26 @@ This tool reads local logs only. It does not depend on the OpenClaw UI and does 
   - `usage.cost.cacheRead`
   - `usage.cost.cacheWrite`
   - `usage.cost.total`
-- Breaks down usage by:
+- Breaks usage down by:
   - model
   - provider
   - session file
-- Generates chat-ready daily / weekly / monthly markdown reports
+- Generates chat-ready daily / weekly / monthly reports
 
 ---
 
 ## Why this exists
 
-OpenClaw logs already contain a lot of useful usage data, but:
+OpenClaw logs already contain useful accounting data, but raw logs are annoying to reason about at speed.
 
-- the UI is not always the fastest way to investigate a spike
-- historical totals are easier to compare offline
-- model / provider / session breakdowns are often more useful than a single total number
-
-This project turns raw session logs into something you can actually use for:
+This project is for the practical layer in between:
 
 - daily accounting
 - anomaly detection
 - model cost observation
 - “what just happened?” debugging
+
+The goal is not fancy dashboards. The goal is fast, offline answers.
 
 ---
 
@@ -57,6 +73,7 @@ This project turns raw session logs into something you can actually use for:
 
 ```text
 openclaw-token-stats/
+├── README.md
 ├── SKILL.md
 ├── scripts/
 │   ├── openclaw_token_stats.py
@@ -74,43 +91,43 @@ openclaw-token-stats/
 
 ## Quick start
 
-### 1. Aggregate by model
+### Aggregate by model
 
 ```bash
 python3 scripts/openclaw_token_stats.py --agent main --days 1 --by model
 ```
 
-### 2. Aggregate by provider
+### Aggregate by provider
 
 ```bash
 python3 scripts/openclaw_token_stats.py --agent main --days 7 --by provider
 ```
 
-### 3. Find spikes by session file
+### Find spikes by session file
 
 ```bash
 python3 scripts/openclaw_token_stats.py --agent main --days 2 --by session
 ```
 
-### 4. Output JSON
+### Output JSON
 
 ```bash
 python3 scripts/openclaw_token_stats.py --agent main --days 7 --by model --json
 ```
 
-### 5. Generate a daily report
+### Generate a daily report
 
 ```bash
 python3 scripts/openclaw_token_report.py --agent main --period daily
 ```
 
-### 6. Generate a weekly report
+### Generate a weekly report
 
 ```bash
 python3 scripts/openclaw_token_report.py --agent main --period weekly
 ```
 
-### 7. Generate a monthly report
+### Generate a monthly report
 
 ```bash
 python3 scripts/openclaw_token_report.py --agent main --period monthly
@@ -118,19 +135,25 @@ python3 scripts/openclaw_token_report.py --agent main --period monthly
 
 ---
 
-## Example use cases
+## Example output
 
-- Check total token burn for the last 24 hours
-- Compare model usage over the last 7 days
-- See whether cost is coming from active inference or cache
-- Debug a sudden token spike without relying on UI state
-- Send a lightweight daily usage summary into chat or cron output
+See [`examples/sample-daily-report.md`](examples/sample-daily-report.md).
 
 ---
 
-## Example output
+## Accounting philosophy
 
-See: [`examples/sample-daily-report.md`](examples/sample-daily-report.md)
+This project intentionally prefers the stable view first:
+
+> Start with the overall ledger: total usage + top models + cache + cost.
+
+Why:
+
+- overall totals are usually the most stable signal
+- per-session drilldown is useful, but should be treated as a debugging view
+- “main conversation vs background work” reconstruction is helpful, but not always perfect from logs alone
+
+In other words: total first, drill down second.
 
 ---
 
@@ -151,20 +174,6 @@ This tool is intentionally conservative.
 
 ---
 
-## Current accounting philosophy
-
-The current recommended reading is:
-
-> Prefer the overall ledger first: total usage + top models + cache + cost.
-
-Why:
-
-- OpenClaw session mapping for “main conversation vs background work” is useful, but not always perfectly reconstructible from logs alone
-- the overall ledger is the most stable first view
-- per-session drilldown still works, but should be treated as a debugging view, not absolute truth
-
----
-
 ## Best fit
 
 This project is best for:
@@ -176,7 +185,7 @@ This project is best for:
 
 ---
 
-## Safety / privacy
+## Privacy / safety
 
 - Reads local files only
 - No external upload path in the reporting scripts
@@ -186,6 +195,6 @@ This project is best for:
 
 ## Status
 
-Usable now. The current focus is practical observability, not fancy visualization.
+Usable now.
 
-If you want charts later, build them on top of the JSON output rather than bloating the core scripts.
+The current focus is practical observability, not polished visualization. If you want charts later, build them on top of the JSON output instead of bloating the core scripts.
