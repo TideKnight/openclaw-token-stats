@@ -1,0 +1,3 @@
+Run this exact command and return its stdout as your entire final reply, with no extra commentary before or after:
+
+python3 /home/yang/.openclaw/workspace/skills/openclaw-token-stats/scripts/openclaw_token_report.py --agent main --period weekly --tz Asia/Shanghai
